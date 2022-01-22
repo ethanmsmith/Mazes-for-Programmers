@@ -1,7 +1,7 @@
 class Cell {
 
-    row : Number;
-    col : Number;
+    row : number;
+    col : number;
     north: Cell;
     south: Cell;
     east: Cell;
