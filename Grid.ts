@@ -1,3 +1,5 @@
+import Cell from './Cell';
+
 export default class Grid {
 
     rows: number;
@@ -7,23 +9,24 @@ export default class Grid {
     public constructor(rows: number, cols: number) {
         this.rows = rows;
         this.cols = cols;
-        this.grid = new Array<Array<Cell>>(rows)
-
+        this.grid = new Array(rows);
         this.prepareGrid();
         this.configureCells();
     }
-
+    
     private prepareGrid(): void {
-        for(let r: number = 0; r++; r < this.rows) {
-            const row = new Array<Cell>(this.cols);
-            for(let c: number = 0; c++; c < this.cols) {
-                row.push(new Cell(r, c));
+        console.log('Preparing grid...');
+        for (let r = 0; r < this.rows; r++) {
+            const row: Cell[] = new Array(this.cols);
+            for (let c: number = 0; c < this.cols; c++) {
+                row[c] = new Cell(r, c);
             }
-            this.grid.push(row);
+            this.grid[r] = row;
         }
     }
 
     private configureCells(): void {
+        console.log("Configuring cells...")
         this.getCells().forEach((cell: Cell) => {
             const [row, col] = [cell.row, cell.col];
             cell.north = this.getCell(row - 1, col);
@@ -44,14 +47,10 @@ export default class Grid {
     }
 
     public getRows(): Cell[][] {
-        const rows: Cell[][] = new Array(this.rows);
-        this.grid.forEach((row: Cell[]) => {
-            rows.push(row);
-        });
-        return rows;
+        return this.grid;
     }
 
-    private getCell(row: number, col: number): Cell {
+    private getCell(row: number, col: number): Cell | null {
         return (row >= 0 && row < this.rows && col >= 0 && col < this.cols) ? this.grid[row][col] : null
     }
 
@@ -66,4 +65,30 @@ export default class Grid {
         return this.grid[row][col]
     }
 
+    public toString(): string {
+        let output = `+${(() => {
+            let str: string = '';
+            for (let i: number = 0; i < this.cols; i++) {
+                str += '---+';
+            }
+            return str;
+        })()}\n`;
+
+        this.getRows().forEach((row: Cell[]) => {
+            let top = '|';
+            let bottom = '+';
+            row.forEach((cell: Cell) => {
+                const tCell: Cell = cell ? cell : new Cell(-1, -1);
+                let body = '   ';
+                let eastBoundary = cell.linked(tCell.east) ? ' ' : '|';
+                top += `${body}${eastBoundary}`;
+                let southBoundary = cell.linked(tCell.south) ? '   ' : '---';
+                const corner = '+';
+                bottom += `${southBoundary}${corner}`;
+            });
+
+            output += `${top}\n${bottom}\n`;
+        })
+        return output;
+    }
 }

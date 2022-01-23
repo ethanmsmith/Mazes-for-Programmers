@@ -1,16 +1,21 @@
-class Cell {
+export default class Cell {
 
     row : number;
     col : number;
-    north: Cell;
-    south: Cell;
-    east: Cell;
-    west: Cell;
+    north: Cell | null;
+    south: Cell | null;
+    east: Cell | null;
+    west: Cell | null;
     links: Set<Cell>;
 
-    constructor(row, col) {
+    constructor(row: number, col: number) {
         this.row = row;
         this.col = col;
+        this.north = null;
+        this.south = null;
+        this.east = null;
+        this.west = null;
+        this.links = new Set<Cell>();
     }
 
     link(cell: Cell, bidi: boolean): Cell {
@@ -29,7 +34,7 @@ class Cell {
         return this.links.values();
     }
 
-    linked(cell): boolean {
+    linked(cell: Cell | null): boolean {
         for(let linkedCell of this.linkedCells()) {
             if(cell === linkedCell) {
                 return true;

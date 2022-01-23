@@ -1,11 +1,8 @@
 import Grid from './Grid';
+import Cell from './Cell';
 
-class BinaryTree {
-    constructor(parameters) {
-        
-    }
-
-    on(grid: Grid): Grid {
+export default class BinaryTree {
+    static on(grid: Grid): Grid {
         grid.getCells().forEach((cell: Cell) => {
             const neighbors = new Array();
             cell.north ? neighbors.push(cell.north) : null;
