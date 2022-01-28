@@ -1,5 +1,8 @@
 import Cell from './Cell';
 
+import { createCanvas } from 'canvas';
+import fs from 'fs';
+
 export default class Grid {
 
     rows: number;
@@ -13,7 +16,7 @@ export default class Grid {
         this.prepareGrid();
         this.configureCells();
     }
-    
+
     private prepareGrid(): void {
         console.log('Preparing grid...');
         for (let r = 0; r < this.rows; r++) {
@@ -65,6 +68,10 @@ export default class Grid {
         return this.grid[row][col]
     }
 
+    cellContents(cell: Cell): string {
+        return ' ';
+    }
+    
     public toString(): string {
         let output = `+${(() => {
             let str: string = '';
@@ -78,17 +85,62 @@ export default class Grid {
             let top = '|';
             let bottom = '+';
             row.forEach((cell: Cell) => {
-                const tCell: Cell = cell ? cell : new Cell(-1, -1);
-                let body = '   ';
-                let eastBoundary = cell.linked(tCell.east) ? ' ' : '|';
+                cell = cell ? cell : new Cell(-1, -1);
+                let body = ` ${this.cellContents(cell)} `;
+                let eastBoundary = cell.linked(cell.east) ? ' ' : '|';
                 top += `${body}${eastBoundary}`;
-                let southBoundary = cell.linked(tCell.south) ? '   ' : '---';
+                let southBoundary = cell.linked(cell.south) ? '   ' : '---';
                 const corner = '+';
                 bottom += `${southBoundary}${corner}`;
             });
 
             output += `${top}\n${bottom}\n`;
-        })
+        });
+
         return output;
+    }
+
+    public toPNG(cellSize: number = 10, output: string = './grid.png') {
+        const [width, height]: number[] = [cellSize * this.cols, cellSize * this.rows];
+        const [bg, wall]: string[] = ['#fff', '#000'];
+
+        const canvas = createCanvas(width + 1, height + 1);
+        const context = canvas.getContext('2d');
+        context.fillStyle = bg;
+        context.fillRect(0, 0, width + 1, height + 1);
+        context.strokeStyle = wall;
+        context.lineWidth = 5;
+
+        this.getCells().forEach((cell: Cell) => {
+            const [x1, y1, x2, y2]: number[] = [cell.col * cellSize, cell.row * cellSize, (cell.col + 1) * cellSize, (cell.row + 1) * cellSize];
+
+            if (!cell.north) {
+                context.beginPath();
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y1);
+                context.stroke();
+            }
+            if (!cell.west) {
+                context.beginPath();
+                context.moveTo(x1, y1);
+                context.lineTo(x1, y2);
+                context.stroke();
+            }
+            if (!cell.linked(cell.east)) {
+                context.beginPath();
+                context.moveTo(x2, y1);
+                context.lineTo(x2, y2);
+                context.stroke();
+            }
+            if (!cell.linked(cell.south)) {
+                context.beginPath();
+                context.moveTo(x1, y2);
+                context.lineTo(x2, y2);
+                context.stroke();
+            }
+        });
+        
+        const buffer = canvas.toBuffer('image/png');
+        fs.writeFileSync(output, buffer);
     }
 }
