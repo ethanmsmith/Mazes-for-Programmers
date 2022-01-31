@@ -37,4 +37,18 @@ export default class Distances {
 
         return breadcrumbs;
     }
+
+    max(): [Cell, number] {
+        let maxDistance: number = 0;
+        let maxCell: Cell = this.root;
+
+        this.cells.forEach((distance: number, cell: Cell) => {
+            if(distance > maxDistance) {
+                maxCell = cell;
+                maxDistance = distance;
+            }
+        });
+
+        return [maxCell, maxDistance]
+    }
 }

@@ -53,7 +53,7 @@ export default class Grid {
         return this.grid;
     }
 
-    private getCell(row: number, col: number): Cell | null {
+    public getCell(row: number, col: number): Cell | null {
         return (row >= 0 && row < this.rows && col >= 0 && col < this.cols) ? this.grid[row][col] : null
     }
 
