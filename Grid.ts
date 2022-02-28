@@ -1,7 +1,9 @@
 import Cell from './Cell';
+import Modes from './Modes';
 
 import { createCanvas } from 'canvas';
 import fs from 'fs';
+import Distances from './Distances';
 
 export default class Grid {
 
@@ -71,7 +73,7 @@ export default class Grid {
     cellContents(cell: Cell): string {
         return ' ';
     }
-    
+
     public toString(): string {
         let output = `+${(() => {
             let str: string = '';
@@ -100,7 +102,11 @@ export default class Grid {
         return output;
     }
 
-    public toPNG(cellSize: number = 10, output: string = './grid.png') {
+    public backgroundColor(cell: Cell): string {
+        return 'rgb(250,250,250)';
+    }
+
+    public toPNG(cellSize: number = 10, output: string = './grid.png', solution?: Distances) {
         const [width, height]: number[] = [cellSize * this.cols, cellSize * this.rows];
         const [bg, wall]: string[] = ['#fff', '#000'];
 
@@ -111,35 +117,51 @@ export default class Grid {
         context.strokeStyle = wall;
         context.lineWidth = 5;
 
-        this.getCells().forEach((cell: Cell) => {
-            const [x1, y1, x2, y2]: number[] = [cell.col * cellSize, cell.row * cellSize, (cell.col + 1) * cellSize, (cell.row + 1) * cellSize];
+        for (let mode in Modes) {
+            this.getCells().forEach((cell: Cell) => {
+                const [x1, y1, x2, y2]: number[] = [cell.col * cellSize, cell.row * cellSize, (cell.col + 1) * cellSize, (cell.row + 1) * cellSize];
 
-            if (!cell.north) {
-                context.beginPath();
-                context.moveTo(x1, y1);
-                context.lineTo(x2, y1);
-                context.stroke();
-            }
-            if (!cell.west) {
-                context.beginPath();
-                context.moveTo(x1, y1);
-                context.lineTo(x1, y2);
-                context.stroke();
-            }
-            if (!cell.linked(cell.east)) {
-                context.beginPath();
-                context.moveTo(x2, y1);
-                context.lineTo(x2, y2);
-                context.stroke();
-            }
-            if (!cell.linked(cell.south)) {
-                context.beginPath();
-                context.moveTo(x1, y2);
-                context.lineTo(x2, y2);
-                context.stroke();
-            }
-        });
-        
+                if (mode === "Background") {
+                    let color: string;
+                    if(solution?.cells.has(cell)) {
+                        color = "#fff000"
+                    } else {
+                        color = this.backgroundColor(cell);
+                    }
+                    context.fillStyle = color;
+                    context.fillRect(x1, y1, cellSize, cellSize);
+                } else {
+                    if (!cell.north) {
+                        context.beginPath();
+                        context.moveTo(x1, y1);
+                        context.lineTo(x2, y1);
+                        context.stroke();
+                    }
+                    if (!cell.west) {
+                        context.beginPath();
+                        context.moveTo(x1, y1);
+                        context.lineTo(x1, y2);
+                        context.stroke();
+                    }
+                    if (!cell.linked(cell.east)) {
+                        context.beginPath();
+                        context.moveTo(x2, y1);
+                        context.lineTo(x2, y2);
+                        context.stroke();
+                    }
+                    if (!cell.linked(cell.south)) {
+                        context.beginPath();
+                        context.moveTo(x1, y2);
+                        context.lineTo(x2, y2);
+                        context.stroke();
+                    }
+                }
+            });
+        }
+
+        if(solution) {
+
+        }
         const buffer = canvas.toBuffer('image/png');
         fs.writeFileSync(output, buffer);
     }

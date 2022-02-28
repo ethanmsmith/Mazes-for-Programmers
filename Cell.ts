@@ -65,7 +65,7 @@ export default class Cell {
             frontier.forEach((cell: Cell) => {
                 cell.links.forEach((link: Cell) => {
                     if(distances.get(link) !== undefined) {
-                        link === this ? console.log(distances.get(link)) : null;
+                        // link === this ? console.log(distances.get(link)) : null;
                         return;
                     }
                     distances.set(link, (distances.get(cell) as number) + 1);
